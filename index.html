@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transform Text</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        #inputText {
+            width: 500px;
+            height: 100px;
+        }
+    </style>
+    <script>
+        function transformText() {
+            var text = document.getElementById("inputText").value;
+            var excludedWords = [
+                "de", "se", 
+                "pour", 
+                "para",
+                "avec",
+                "et", 
+                "und", "una", 
+                "cm", "cm)", 
+                "fur", 
+                "mit", 
+                "x", 
+                "usw", 
+                "für", 
+                "la", "le",
+                "à", "è", "e", 
+                "en", 
+                "des", 
+                "per", 
+                "di", "vi",
+                "non",
+                "con"
+            ];
+            var uppercaseWords = ["diy", "aokito"];
+
+            text = text.toLowerCase();
+            var words = text.split(" ");
+
+            for (var i = 0; i < words.length; i++) {
+                words[i] = words[i].replace(/，/g, ",");
+                // console.log(words[i]+'========='+sumstr(words[i],','))
+                if(sumstr(words[i],',') > 1){
+                    var words_two = words[i].split(",");
+                    for (var j = 0; j < words_two.length; j++) {
+                        words_two[j] = strMakeOne(words_two[j],uppercaseWords,excludedWords);
+                    }
+                    words[i] = words_two.join(" ");
+                // console.log('=========>>>>>888888888>'+words[i])
+                }else{
+                    words[i] = strMakeOne(words[i],uppercaseWords,excludedWords);
+                }
+            }
+
+            var transformedText = words.join(" ");
+
+            document.getElementById("output").innerText = transformedText;
+        }
+        function sumstr(str, a) {
+            let b = str.indexOf(a);
+            var num = 0;
+            while (b !== -1) {
+                num++;
+                b = str.indexOf(a, b + 1)
+            }
+            return num;
+        }
+        function strMakeOne(str,uppercaseWords,excludedWords){
+            temp = str.replace(/[,]/g, "");
+            re = str;
+            if (uppercaseWords.includes(temp)) {
+                re = str.toUpperCase();
+            } else if (!excludedWords.includes(temp)) {
+                if(str.length > 0){
+                    re = str[0].toUpperCase() + str.substring(1);
+                }
+            }
+
+            if (str.includes("(")) {
+                var start = str.indexOf("(") + 1;
+                re = str.substring(0, start) + str[start].toUpperCase() + str.substring(start + 1);
+            }
+            return re;
+        }
+  
+        
+        function copyText() {
+            var outputText = document.getElementById("output").innerText;
+            
+            var tempElement = document.createElement("textarea");
+            tempElement.value = outputText;
+            document.body.appendChild(tempElement);
+            
+            tempElement.select();
+            document.execCommand("copy");
+            
+            document.body.removeChild(tempElement);
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Transform Text</h1>
+
+        <label for="inputText">输入文本:</label>
+        <br>
+        <textarea id="inputText" rows="5" cols="50"></textarea>
+
+        <br>
+        <button onclick="transformText()">执行代码</button>
+
+        <h2>结果:</h2>
+        <div id="output"></div>
+        <button onclick="copyText()">一键复制</button>
+    </div>
+</body>
+</html>
