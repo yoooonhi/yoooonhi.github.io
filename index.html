@@ -23,31 +23,33 @@
         function transformText() {
             var text = document.getElementById("inputText").value;
             var excludedWords = [
-                "de", "se", 
-                "pour", 
-                "para",
+                "de", "se", "do", "ve", 
+                "pour", "para",
                 "avec", "and", 
-                "et", "in", "da", 
+                "et", "in", "da", "di", "vi",
                 "und", "una", "zum", "von", 
                 "cm", "cm)", 
                 "fur", "for",  
                 "mit", "with", 
-                "x", 
+                "las",
                 "usw", 
-                "für", "for", "of",
+                "für", "for", "of", "För",
                 "la", "le", "el", "les", 
-                "à", "è", "e", "y", 
+                "à", "è", "e", "y", "x", "a", "i", 
                 "en", 
                 "des", 
                 "per", 
-                "di", "vi",
+                
                 "non",
                 "con",
                 
-                "do", "ve", "i", 
+                // 意大利
+                "ad", // and
                 
                 // 瑞典
-                "med", "För", "och"
+                "med", "och"
+                
+                
                 
             ];
             var uppercaseWords = ["diy"];
