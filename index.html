@@ -7,7 +7,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            height: 100px;
         }
 
         .container {
@@ -23,31 +23,32 @@
         function transformText() {
             var text = document.getElementById("inputText").value;
             var excludedWords = [
+
+                // 通用
                 "de", "se", "do", "ve", 
                 "pour", "para",
                 "avec", "and", 
-                "et", "in", "da", "di", "vi",
+                "et", "in", "da", "di", "vi", "en", 
                 "und", "una", "zum", "von", 
-                "cm", "cm)", 
-                "fur", "for",  
+                "cm", "cm)", "mm", "m",
                 "mit", "with", 
-                "las",
-                "usw", 
-                "für", "for", "of", "För",
-                "la", "le", "el", "les", 
+                "las", "los", "les", 
+                "für", "for", "of", "För", "fur", "for",
+                "la", "le", "el",
                 "à", "è", "e", "y", "x", "a", "i", 
-                "en", 
                 "des", 
                 "per", 
-                
                 "non",
                 "con",
+                "usw", 
                 
-                "mm", "m", 
                 
                 // 意大利
                 "ad", // and
                 "del",
+
+                // 西班牙
+                
                 
                 // 瑞典
                 "med", "och"
