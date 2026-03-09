@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>亚马逊订单转发票</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero">
+        <p class="eyebrow">Amazon Seller Central</p>
+        <h1>订单文本 -> 发票 PDF</h1>
+        <p class="sub">
+          粘贴订单详情原始文本后，自动生成可导出的发票。
+        </p>
+      </header>
+
+      <section class="layout">
+        <section class="panel input-panel">
+          <h2>1) 粘贴订单文本</h2>
+          <textarea
+            id="rawInput"
+            placeholder="在这里粘贴从亚马逊订单页复制的完整文本..."
+            spellcheck="false"
+          ></textarea>
+
+          <div class="button-row">
+            <button id="parseBtn" class="btn primary">解析并生成</button>
+            <button id="sampleBtn" class="btn ghost">填入样例</button>
+            <button id="clearBtn" class="btn ghost">清空</button>
+          </div>
+
+          <details class="seller-settings" open>
+            <summary>2) 卖家信息（可编辑）</summary>
+            <div class="form-grid">
+              <label>
+                卖家名称
+                <input id="sellerName" value="ABCDEF" />
+              </label>
+              <label>
+                税号 / VAT No.
+                <input id="sellerTaxId" placeholder="例如 DE123456789" />
+              </label>
+              <label class="span-2">
+                卖家地址
+                <textarea
+                  id="sellerAddress"
+                  rows="3"
+                  placeholder="例如：Musterstr. 1, 10115 Berlin, Germany"
+                ></textarea>
+              </label>
+            </div>
+          </details>
+
+          <details class="seller-settings" open>
+            <summary>3) 买家信息（可编辑）</summary>
+            <div class="form-grid">
+              <label>
+                买家名称（覆盖自动识别）
+                <input id="buyerNameOverride" placeholder="例如：Santos" />
+              </label>
+              <label>
+                买家 VAT 号
+                <input id="buyerVatOverride" placeholder="例如：DE123456789" />
+              </label>
+              <label class="span-2">
+                买家地址（覆盖自动识别）
+                <textarea
+                  id="buyerAddressOverride"
+                  rows="3"
+                  placeholder="例如：Musterweg 9, Berlin, 10115, Germany"
+                ></textarea>
+              </label>
+            </div>
+          </details>
+        </section>
+
+        <section class="panel preview-panel">
+          <div class="preview-toolbar">
+            <h2>4) 发票预览</h2>
+            <button id="pdfBtn" class="btn primary">导出 PDF</button>
+          </div>
+          <p id="statusText" class="status">
+            等待订单文本。点击“解析并生成”后会创建发票内容。
+          </p>
+
+          <article id="invoice" class="invoice empty-state">
+            <p class="empty-title">暂无发票内容</p>
+            <p class="empty-desc">请先在左侧粘贴订单文本，再点击“解析并生成”。</p>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
