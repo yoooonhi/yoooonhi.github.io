@@ -1,144 +1,386 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Transform Text</title>
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>标题格式化工具</title>
     <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+      :root {
+        --bg-1: #f7fbff;
+        --bg-2: #eef7f2;
+        --panel: #ffffff;
+        --ink: #1d2733;
+        --muted: #5a6a7d;
+        --line: #d7e0e8;
+        --brand: #0f7b6c;
+        --brand-strong: #0c5f54;
+        --shadow: 0 14px 36px -24px rgba(26, 44, 59, 0.42);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        color: var(--ink);
+        font-family:
+          "Avenir Next",
+          "Noto Sans SC",
+          "PingFang SC",
+          "Microsoft YaHei",
+          sans-serif;
+        background:
+          radial-gradient(circle at 8% 8%, #e6f5ff 0%, transparent 30%),
+          radial-gradient(circle at 92% 92%, #e4f6ea 0%, transparent 28%),
+          linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      }
+
+      .page {
+        width: min(1100px, 94vw);
+        margin: 24px auto;
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        padding: 20px;
+      }
+
+      .title {
+        margin: 0;
+        font-size: clamp(1.35rem, 2.6vw, 2rem);
+      }
+
+      .subtitle {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 0.93rem;
+      }
+
+      .main-grid {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 12px;
+        background: #fff;
+      }
+
+      .panel h2 {
+        margin: 0 0 8px;
+        font-size: 1rem;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 270px;
+        resize: vertical;
+        border: 1px solid #c8d3dd;
+        border-radius: 10px;
+        padding: 11px 12px;
+        font: inherit;
+        line-height: 1.45;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: var(--brand);
+        box-shadow: 0 0 0 3px rgba(15, 123, 108, 0.12);
+      }
+
+      #outputText {
+        background: #f9fbfc;
+      }
+
+      .toolbar {
+        margin-top: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .btn {
+        border: 1px solid transparent;
+        border-radius: 10px;
+        padding: 8px 12px;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .btn-primary {
+        background: var(--brand);
+        color: #fff;
+      }
+
+      .btn-primary:hover {
+        background: var(--brand-strong);
+      }
+
+      .btn-ghost {
+        background: #fff;
+        border-color: #c8d3dd;
+        color: var(--ink);
+      }
+
+      .switch {
+        margin-left: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 0.9rem;
+        user-select: none;
+      }
+
+      .meta {
+        margin-top: 10px;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      .status.ok {
+        color: #0f7b6c;
+      }
+
+      .status.error {
+        color: #b42318;
+      }
+
+      @media (max-width: 900px) {
+        .main-grid {
+          grid-template-columns: 1fr;
         }
 
-        .container {
-            text-align: center;
+        .switch {
+          margin-left: 0;
+          width: 100%;
         }
-
-        #inputText {
-            width: 500px;
-            height: 100px;
-        }
+      }
     </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="card">
+        <h1 class="title">标题格式化工具</h1>
+        <p class="subtitle">
+          用于把商品标题统一为可读格式。支持排除词、强制大写词，保留原始换行与标点结构。
+        </p>
+
+        <div class="main-grid">
+          <article class="panel">
+            <h2>输入文本</h2>
+            <textarea
+              id="inputText"
+              placeholder="粘贴原始标题或文本，支持多行。按 Ctrl/Cmd + Enter 可快速执行。"
+            ></textarea>
+          </article>
+
+          <article class="panel">
+            <h2>输出结果</h2>
+            <textarea id="outputText" readonly placeholder="转换后结果会显示在这里。"></textarea>
+          </article>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn btn-primary" id="transformBtn" type="button">执行转换</button>
+          <button class="btn btn-ghost" id="copyBtn" type="button">复制结果</button>
+          <button class="btn btn-ghost" id="sampleBtn" type="button">填充示例</button>
+          <button class="btn btn-ghost" id="clearBtn" type="button">清空</button>
+          <label class="switch">
+            <input id="autoRun" type="checkbox" checked />
+            实时转换
+          </label>
+        </div>
+
+        <div class="meta">
+          <span id="counter">字符数: 0</span>
+          <span class="status" id="statusText">等待输入</span>
+        </div>
+      </section>
+    </main>
+
     <script>
-        function transformText() {
-            var text = document.getElementById("inputText").value;
-            var excludedWords = [
+      "use strict";
 
-                // 通用
-                "on",
-                "de", "se", "do", "ve", "du",
-                "pour", "para",
-                "avec", "and", 
-                "et", "in", "da", "di", "vi", "en", 
-                "und", "una", "zum", "von", 
-                "cm", "cm)", "mm", "m",
-                "mit", "with", 
-                "las", "los", "les", 
-                "für", "for", "of", "För", "fur", "for",
-                "la", "le", "el",
-                "à", "è", "e", "y", "x", "a", "i", 
-                "des", 
-                "per", 
-                "non",
-                "con",
-                "usw", 
-                "aus",
-                
-                
-                // 意大利
-                "ad", // and
-                "del",
+      const SMALL_WORDS = new Set([
+        "a",
+        "ad",
+        "and",
+        "aus",
+        "avec",
+        "cm",
+        "con",
+        "da",
+        "de",
+        "del",
+        "des",
+        "di",
+        "do",
+        "du",
+        "e",
+        "el",
+        "en",
+        "et",
+        "for",
+        "fur",
+        "für",
+        "i",
+        "in",
+        "la",
+        "las",
+        "le",
+        "les",
+        "los",
+        "m",
+        "med",
+        "mit",
+        "mm",
+        "non",
+        "och",
+        "of",
+        "on",
+        "para",
+        "per",
+        "pour",
+        "se",
+        "und",
+        "una",
+        "usw",
+        "ve",
+        "vi",
+        "von",
+        "with",
+        "x",
+        "y",
+        "zum",
+        "à",
+        "è",
+      ]);
 
-                // 西班牙
-                
-                
-                // 瑞典
-                "med", "och"
-                
-                
-                
-            ];
-            var uppercaseWords = ["diy"];
+      const FORCE_UPPER_WORDS = new Set(["diy"]);
 
-            text = text.toLowerCase();
-            var words = text.split(" ");
+      const inputTextEl = document.getElementById("inputText");
+      const outputTextEl = document.getElementById("outputText");
+      const statusTextEl = document.getElementById("statusText");
+      const counterEl = document.getElementById("counter");
+      const autoRunEl = document.getElementById("autoRun");
+      const transformBtnEl = document.getElementById("transformBtn");
+      const copyBtnEl = document.getElementById("copyBtn");
+      const sampleBtnEl = document.getElementById("sampleBtn");
+      const clearBtnEl = document.getElementById("clearBtn");
 
-            for (var i = 0; i < words.length; i++) {
-                words[i] = words[i].replace(/，/g, ",");
-                // console.log(words[i]+'========='+sumstr(words[i],','))
-                if(sumstr(words[i],',') > 1){
-                    var words_two = words[i].split(",");
-                    for (var j = 0; j < words_two.length; j++) {
-                        words_two[j] = strMakeOne(words_two[j],uppercaseWords,excludedWords);
-                    }
-                    words[i] = words_two.join(" ");
-                // console.log('=========>>>>>888888888>'+words[i])
-                }else{
-                    words[i] = strMakeOne(words[i],uppercaseWords,excludedWords);
-                }
-            }
+      function setStatus(message, type) {
+        statusTextEl.textContent = message;
+        statusTextEl.className = `status ${type || ""}`.trim();
+      }
 
-            var transformedText = words.join(" ");
+      function normalizeInput(text) {
+        return String(text || "")
+          .replace(/\u3000/g, " ")
+          .replace(/，/g, ",")
+          .replace(/。/g, ".")
+          .replace(/；/g, ";")
+          .replace(/：/g, ":")
+          .replace(/（/g, "(")
+          .replace(/）/g, ")");
+      }
 
-            document.getElementById("output").innerText = transformedText;
+      function transformWord(rawWord) {
+        const lowerWord = rawWord.toLowerCase();
+
+        if (FORCE_UPPER_WORDS.has(lowerWord)) {
+          return lowerWord.toUpperCase();
         }
-        function sumstr(str, a) {
-            let b = str.indexOf(a);
-            var num = 0;
-            while (b !== -1) {
-                num++;
-                b = str.indexOf(a, b + 1)
-            }
-            return num;
-        }
-        function strMakeOne(str,uppercaseWords,excludedWords){
-            temp = str.replace(/[,]/g, "");
-            re = str;
-            if (uppercaseWords.includes(temp)) {
-                re = str.toUpperCase();
-            } else if (!excludedWords.includes(temp)) {
-                if(str.length > 0){
-                    re = str[0].toUpperCase() + str.substring(1);
-                }
-            }
 
-            if (str.includes("(")) {
-                var start = str.indexOf("(") + 1;
-                re = str.substring(0, start) + str[start].toUpperCase() + str.substring(start + 1);
-            }
-            return re;
+        if (SMALL_WORDS.has(lowerWord) || /^\d+$/.test(lowerWord)) {
+          return lowerWord;
         }
-  
-        
-        function copyText() {
-            var outputText = document.getElementById("output").innerText;
-            
-            var tempElement = document.createElement("textarea");
-            tempElement.value = outputText;
-            document.body.appendChild(tempElement);
-            
-            tempElement.select();
-            document.execCommand("copy");
-            
-            document.body.removeChild(tempElement);
+
+        if (!lowerWord.length) return lowerWord;
+        return lowerWord[0].toUpperCase() + lowerWord.slice(1);
+      }
+
+      function transformText(text) {
+        const normalized = normalizeInput(text).toLowerCase();
+        return normalized.replace(/[A-Za-zÀ-ÖØ-öø-ÿ0-9]+/g, transformWord);
+      }
+
+      function refreshMeta() {
+        const length = outputTextEl.value.length;
+        counterEl.textContent = `字符数: ${length}`;
+      }
+
+      function runTransform() {
+        outputTextEl.value = transformText(inputTextEl.value);
+        refreshMeta();
+        setStatus("转换完成", "ok");
+      }
+
+      async function copyResult() {
+        const text = outputTextEl.value;
+        if (!text) {
+          setStatus("没有可复制内容", "error");
+          return;
         }
+
+        try {
+          await navigator.clipboard.writeText(text);
+          setStatus("已复制到剪贴板", "ok");
+        } catch (_error) {
+          outputTextEl.select();
+          document.execCommand("copy");
+          window.getSelection().removeAllRanges();
+          setStatus("已复制到剪贴板", "ok");
+        }
+      }
+
+      function fillSample() {
+        inputTextEl.value =
+          "iphone 16e 128 gb: entwickelt für apple intelligence, a18 chip, gigantische batterielaufzeit, 48 mp fusion kamera, 6,1'' super retina xdr display, schwarz";
+        runTransform();
+      }
+
+      function clearAll() {
+        inputTextEl.value = "";
+        outputTextEl.value = "";
+        refreshMeta();
+        setStatus("已清空", "");
+        inputTextEl.focus();
+      }
+
+      inputTextEl.addEventListener("input", () => {
+        if (autoRunEl.checked) runTransform();
+      });
+
+      inputTextEl.addEventListener("keydown", (event) => {
+        const isShortcut = (event.ctrlKey || event.metaKey) && event.key === "Enter";
+        if (isShortcut) {
+          event.preventDefault();
+          runTransform();
+        }
+      });
+
+      transformBtnEl.addEventListener("click", runTransform);
+      copyBtnEl.addEventListener("click", copyResult);
+      sampleBtnEl.addEventListener("click", fillSample);
+      clearBtnEl.addEventListener("click", clearAll);
+
+      refreshMeta();
     </script>
-</head>
-<body>
-    <div class="container">
-        <h1>Transform Text</h1>
-
-        <label for="inputText">输入文本:</label>
-        <br>
-        <textarea id="inputText" rows="5" cols="50"></textarea>
-
-        <br>
-        <button onclick="transformText()">执行代码</button>
-
-        <h2>结果:</h2>
-        <div id="output"></div>
-        <button onclick="copyText()">一键复制</button>
-    </div>
-</body>
+  </body>
 </html>
-
