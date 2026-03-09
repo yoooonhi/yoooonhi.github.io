@@ -29,7 +29,11 @@ const SAMPLE_TEXT = `Apple
 Lena Müller
 Hauptstraße 15
 München, 80331
+<<<<<<< HEAD
 德国
+=======
+奥地利
+>>>>>>> origin/master
 联系买家:  Andrea
 收税模型:  MarketplaceFacilitator
 Legislation:  欧盟视同经销商
@@ -45,6 +49,7 @@ SKU: TESE-0001
 扣除增值税的销售收益:  €6.71`;
 
 const COUNTRY_NAME_MAP = {
+<<<<<<< HEAD
   阿拉伯联合酋长国: "United Arab Emirates",
   阿联酋: "United Arab Emirates",
   爱尔兰: "Ireland",
@@ -74,10 +79,29 @@ const COUNTRY_CODE_BY_NAME = {
   australia: "AU",
   belgium: "BE",
   poland: "PL",
+=======
+  德国: "Germany",
+  法国: "France",
+  意大利: "Italy",
+  西班牙: "Spain",
+  奥地利: "Austria",
+  荷兰: "Netherlands",
+  比利时: "Belgium",
+  葡萄牙: "Portugal",
+  爱尔兰: "Ireland",
+  匈牙利: "Hungary",
+  丹麦: "Denmark",
+  加拿大: "Canada",
+  美国: "United States",
+};
+
+const COUNTRY_CODE_BY_NAME = {
+>>>>>>> origin/master
   germany: "DE",
   france: "FR",
   italy: "IT",
   spain: "ES",
+<<<<<<< HEAD
   netherlands: "NL",
   canada: "CA",
   "united states": "US",
@@ -114,10 +138,25 @@ const COUNTRY_CODE_BY_NAME = {
   澳大利亚: "AU",
   比利时: "BE",
   波兰: "PL",
+=======
+  belgium: "BE",
+  netherlands: "NL",
+  canada: "CA",
+  kanada: "CA",
+  "united states": "US",
+  usa: "US",
+  deutschland: "DE",
+  frankreich: "FR",
+  italien: "IT",
+  spanien: "ES",
+  belgien: "BE",
+  niederlande: "NL",
+>>>>>>> origin/master
   德国: "DE",
   法国: "FR",
   意大利: "IT",
   西班牙: "ES",
+<<<<<<< HEAD
   荷兰: "NL",
   加拿大: "CA",
   美国: "US",
@@ -128,6 +167,12 @@ const COUNTRY_CODE_BY_NAME = {
   沙特: "SA",
   土耳其: "TR",
   英国: "UK",
+=======
+  比利时: "BE",
+  荷兰: "NL",
+  加拿大: "CA",
+  美国: "US",
+>>>>>>> origin/master
 };
 
 const STANDARD_VAT_RATE_BY_COUNTRY = {
@@ -139,6 +184,7 @@ const STANDARD_VAT_RATE_BY_COUNTRY = {
   NL: 21,
 };
 
+<<<<<<< HEAD
 const CURRENCY_BY_COUNTRY_CODE = {
   AE: "AED",
   IE: "EUR",
@@ -160,6 +206,8 @@ const CURRENCY_BY_COUNTRY_CODE = {
   UK: "GBP",
 };
 
+=======
+>>>>>>> origin/master
 const COMMON_VAT_RATES = [0, 5, 7, 8, 9, 10, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27];
 
 function escapeHtml(value) {
@@ -277,6 +325,7 @@ function parseMoney(value) {
   return Number.isFinite(num) ? num : null;
 }
 
+<<<<<<< HEAD
 function currencyTokenFromCountryCode(countryCode) {
   const code = String(countryCode || "").toUpperCase();
   const currencyCode = CURRENCY_BY_COUNTRY_CODE[code];
@@ -338,6 +387,14 @@ function formatCurrencyWithIntl(
   }).format(num);
   if (!fallbackPrefix) return formatted;
   return formatted.includes(fallbackPrefix) ? formatted : formatted.replace("$", fallbackPrefix);
+=======
+function detectCurrency(text) {
+  if (/CA\$/i.test(text)) return "CA$";
+  if (/US\$/i.test(text)) return "US$";
+  const symbol = matchOne(text, /([€$£¥])/);
+  if (symbol) return symbol;
+  return "€";
+>>>>>>> origin/master
 }
 
 function formatMoney(value, symbol = "€") {
@@ -345,6 +402,7 @@ function formatMoney(value, symbol = "€") {
   if (!Number.isFinite(num)) return "";
 
   if (symbol === "€") {
+<<<<<<< HEAD
     return formatCurrencyWithIntl(num, "de-DE", "EUR");
   }
 
@@ -393,11 +451,47 @@ function formatMoney(value, symbol = "€") {
   }
 
   return `${symbol} ${num.toFixed(2)}`;
+=======
+    return new Intl.NumberFormat("de-DE", {
+      style: "currency",
+      currency: "EUR",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(num);
+  }
+
+  if (symbol === "US$") {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+      .format(num)
+      .replace("$", "US$");
+  }
+
+  if (symbol === "CA$") {
+    const formatted = new Intl.NumberFormat("en-CA", {
+      style: "currency",
+      currency: "CAD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(num);
+    return formatted.includes("CA$") ? formatted : formatted.replace("$", "CA$");
+  }
+
+  return `${symbol}${num.toFixed(2)}`;
+>>>>>>> origin/master
 }
 
 function extractMoneyByLabel(text, label, pick = "last") {
   const regex = new RegExp(
+<<<<<<< HEAD
     `${escapeRegExp(label)}\\s*[:：]?\\s*([-+]?\\s*(?:[A-Za-z]{1,4}\\$?|[€$£¥￥₺])?\\s*[\\d.,]+)`,
+=======
+    `${escapeRegExp(label)}\\s*[:：]?\\s*([-+]?\\s*(?:[A-Za-z]{1,3}\\$|[€$£¥])?\\s*[\\d.,]+)`,
+>>>>>>> origin/master
     "g",
   );
   const values = [...text.matchAll(regex)]
@@ -500,7 +594,11 @@ function findProductName(lines) {
 
 function findQuantityAndPrices(text) {
   const byOrderItem = text.match(
+<<<<<<< HEAD
     /订单商品编号:[^\n]*\n\s*(\d+)\s+([-+]?\s*(?:[A-Za-z]{1,4}\$?|[€$£¥￥₺])?\s*[\d.,]+)(?:\s+([-+]?\s*(?:[A-Za-z]{1,4}\$?|[€$£¥￥₺])?\s*[\d.,]+))?/,
+=======
+    /订单商品编号:[^\n]*\n\s*(\d+)\s+([-+]?\s*(?:[A-Za-z]{1,3}\$|[€$£¥])?\s*[\d.,]+)(?:\s+([-+]?\s*(?:[A-Za-z]{1,3}\$|[€$£¥])?\s*[\d.,]+))?/,
+>>>>>>> origin/master
   );
 
   if (byOrderItem) {
@@ -554,9 +652,14 @@ function parseOrderText(rawText) {
   const productName = findProductName(lines);
   const { buyerName, buyerAddress } = findBuyerAndAddress(lines, contactBuyer);
   const { quantity, unitPriceExVat, unitPriceIncVat } = findQuantityAndPrices(text);
+<<<<<<< HEAD
   const marketCountryCode = inferCountryCodeFromChannel(channel) || inferCountryCodeFromAddress(buyerAddress);
 
   const currency = detectCurrency(text, marketCountryCode);
+=======
+
+  const currency = detectCurrency(text);
+>>>>>>> origin/master
   const totalIncVat = extractMoneyByAnyLabel(text, ["总和", "商品总计", "Total payable"], "first");
   const vatTotal = extractMoneyByAnyLabel(text, ["增值税总计", "税费总计", "税务", "Tax total"]);
   const netRevenue = extractMoneyByAnyLabel(text, ["扣除增值税的销售收益", "商品小计", "Item subtotal"], "first");
@@ -577,6 +680,10 @@ function parseOrderText(rawText) {
   const finalVat = effectiveVat ?? (
     effectiveIncVat != null && effectiveExVat != null ? effectiveIncVat - effectiveExVat : null
   );
+<<<<<<< HEAD
+=======
+  const marketCountryCode = inferCountryCodeFromChannel(channel) || inferCountryCodeFromAddress(buyerAddress);
+>>>>>>> origin/master
 
   return {
     orderId,
@@ -649,6 +756,7 @@ function toAddressLines(value) {
 function inferCountryCodeFromChannel(channel) {
   const value = String(channel || "").toLowerCase();
   if (!value) return "";
+<<<<<<< HEAD
   if (/amazon\.ae/.test(value)) return "AE";
   if (/amazon\.ie/.test(value)) return "IE";
   if (/amazon\.(com\.au|au)/.test(value)) return "AU";
@@ -666,6 +774,15 @@ function inferCountryCodeFromChannel(channel) {
   if (/amazon\.es/.test(value)) return "ES";
   if (/amazon\.it/.test(value)) return "IT";
   if (/amazon\.co\.uk/.test(value)) return "UK";
+=======
+  if (/amazon\.de/.test(value)) return "DE";
+  if (/amazon\.fr/.test(value)) return "FR";
+  if (/amazon\.it/.test(value)) return "IT";
+  if (/amazon\.es/.test(value)) return "ES";
+  if (/amazon\.nl/.test(value)) return "NL";
+  if (/amazon\.com\.be/.test(value) || /amazon\.be/.test(value)) return "BE";
+  if (/amazon\.ca/.test(value)) return "CA";
+>>>>>>> origin/master
   if (/amazon\.com/.test(value)) return "US";
   return "";
 }
