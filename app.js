@@ -1058,6 +1058,9 @@ function printInvoiceWithoutFileUrl() {
           }
           .customer-block {
             margin-top: 102px;
+            justify-self: center;
+            width: 78%;
+            max-width: 330px;
             font-size: 12px;
             line-height: 1.35;
           }

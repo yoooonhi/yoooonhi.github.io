@@ -367,6 +367,8 @@ input:focus {
 
 .customer-block {
   margin-top: 116px;
+  justify-self: center;
+  width: min(78%, 330px);
   font-size: 0.83rem;
   line-height: 1.35;
 }
@@ -647,6 +649,8 @@ input:focus {
 
   .customer-block {
     margin-top: 0;
+    justify-self: start;
+    width: auto;
   }
 
   .summary-card,
