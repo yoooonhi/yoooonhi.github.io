@@ -160,6 +160,27 @@ const CURRENCY_BY_COUNTRY_CODE = {
   UK: "GBP",
 };
 
+const SUPPORT_DOMAIN_BY_COUNTRY_CODE = {
+  AE: "amazon.ae",
+  IE: "amazon.ie",
+  AU: "amazon.com.au",
+  BE: "amazon.com.be",
+  PL: "amazon.pl",
+  DE: "amazon.de",
+  FR: "amazon.fr",
+  NL: "amazon.nl",
+  CA: "amazon.ca",
+  US: "amazon.com",
+  MX: "amazon.com.mx",
+  JP: "amazon.co.jp",
+  SE: "amazon.se",
+  SA: "amazon.sa",
+  TR: "amazon.com.tr",
+  ES: "amazon.es",
+  IT: "amazon.it",
+  UK: "amazon.co.uk",
+};
+
 const COMMON_VAT_RATES = [0, 5, 7, 8, 9, 10, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27];
 
 function escapeHtml(value) {
@@ -756,6 +777,17 @@ function formatVatRateDisplay(rate, marketCountryCode = "", amounts = {}) {
   return `${value.toFixed(2).replace(/\.00$/, "")}%`;
 }
 
+function resolveSupportDomain(channel, marketCountryCode = "") {
+  const countryCode = String(marketCountryCode || "").toUpperCase();
+  if (SUPPORT_DOMAIN_BY_COUNTRY_CODE[countryCode]) {
+    return SUPPORT_DOMAIN_BY_COUNTRY_CODE[countryCode];
+  }
+
+  const channelText = String(channel || "").toLowerCase().replace(/\s+/g, "");
+  const domainMatch = channelText.match(/amazon\.(?:co\.[a-z]{2}|com\.[a-z]{2}|[a-z]{2,3})/);
+  return domainMatch ? domainMatch[0] : "";
+}
+
 function renderInvoice(parsed, seller, buyerOverride) {
   const currency = parsed.currency || "€";
 
@@ -791,6 +823,20 @@ function renderInvoice(parsed, seller, buyerOverride) {
   const sellerAddress = seller.address || "-";
   const sellerTaxId = (seller.taxId || "").trim();
   const sellerVatLine = sellerTaxId ? `<p>VAT ID ${escapeHtml(sellerTaxId)}</p>` : "";
+  const supportDomain = resolveSupportDomain(parsed.channel, parsed.marketCountryCode);
+  const supportLineHtml = supportDomain
+    ? `
+        <div class="support-line">
+          For questions about your order, visit
+          <a
+            class="support-link"
+            href="https://www.${escapeHtml(supportDomain)}/contact-us"
+            target="_blank"
+            rel="noopener noreferrer"
+          >www.${escapeHtml(supportDomain)}/contact-us</a>
+        </div>
+      `
+    : "";
   const isTaxInvoice = parsed.vatTotal != null && Math.abs(parsed.vatTotal) > 0.00001;
   const docTitle = isTaxInvoice ? "Invoice" : "Receipt";
   const docNoLabel = isTaxInvoice ? "Invoice number" : "Receipt number";
@@ -925,6 +971,7 @@ function renderInvoice(parsed, seller, buyerOverride) {
             <div class="summary-row total-row"><span>Total payable</span><strong>${escapeHtml(formatMoney(parsed.totalIncVat, currency) || "-")}</strong></div>
           </article>
         </section>
+        ${supportLineHtml}
 
         <div class="template-separator"></div>
 
