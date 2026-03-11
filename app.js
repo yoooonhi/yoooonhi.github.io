@@ -298,6 +298,19 @@ function parseMoney(value) {
   return Number.isFinite(num) ? num : null;
 }
 
+function sumMoneyParts(parts) {
+  let total = 0;
+  let hasValue = false;
+  for (const value of parts) {
+    const num = Number(value);
+    if (Number.isFinite(num)) {
+      total += num;
+      hasValue = true;
+    }
+  }
+  return hasValue ? total : null;
+}
+
 function currencyTokenFromCountryCode(countryCode) {
   const code = String(countryCode || "").toUpperCase();
   const currencyCode = CURRENCY_BY_COUNTRY_CODE[code];
@@ -580,7 +593,8 @@ function parseOrderText(rawText) {
   const currency = detectCurrency(text, marketCountryCode);
   const totalIncVat = extractMoneyByAnyLabel(text, ["总和", "商品总计", "Total payable"], "first");
   const vatTotal = extractMoneyByAnyLabel(text, ["增值税总计", "税费总计", "税务", "Tax total"]);
-  const netRevenue = extractMoneyByAnyLabel(text, ["扣除增值税的销售收益", "商品小计", "Item subtotal"], "first");
+  const netRevenue = extractMoneyByAnyLabel(text, ["扣除增值税的销售收益"], "first");
+  const itemSubtotal = extractMoneyByAnyLabel(text, ["商品小计", "Item subtotal"], "first");
   const shippingCharge = extractMoneyByAnyLabel(text, [
     "Shipping Charge",
     "运费总额",
@@ -590,14 +604,17 @@ function parseOrderText(rawText) {
   const giftWrap = extractMoneyByAnyLabel(text, ["Gift Wrap", "礼品包装"]);
   const promotions = extractMoneyByAnyLabel(text, ["Promotions", "促销总额", "促销", "优惠"]);
 
-  const effectiveIncVat = totalIncVat ?? unitPriceIncVat;
-  const effectiveVat = vatTotal ?? null;
-  const effectiveExVat = netRevenue ?? unitPriceExVat ?? (
-    effectiveIncVat != null && effectiveVat != null ? effectiveIncVat - effectiveVat : null
-  );
-  const finalVat = effectiveVat ?? (
-    effectiveIncVat != null && effectiveExVat != null ? effectiveIncVat - effectiveExVat : null
-  );
+  const itemGross = itemSubtotal ?? (unitPriceIncVat != null ? unitPriceIncVat * quantity : null);
+  const totalFromParts = sumMoneyParts([itemGross, shippingCharge, giftWrap, promotions]);
+  const effectiveIncVat = totalIncVat ?? totalFromParts ?? itemGross ?? unitPriceIncVat;
+  const standardRate = STANDARD_VAT_RATE_BY_COUNTRY[marketCountryCode];
+  const computedVatTotal =
+    vatTotal ?? (standardRate != null && effectiveIncVat != null ? calcVatFromGross(effectiveIncVat, standardRate) : null);
+  const itemNet =
+    netRevenue ??
+    (standardRate != null && itemGross != null ? calcNetFromGross(itemGross, standardRate) : unitPriceExVat);
+  const netTotal =
+    standardRate != null && effectiveIncVat != null ? calcNetFromGross(effectiveIncVat, standardRate) : itemNet;
 
   return {
     orderId,
@@ -614,11 +631,13 @@ function parseOrderText(rawText) {
     sku,
     orderItemId,
     quantity,
-    unitPriceExVat: effectiveExVat,
-    unitPriceIncVat: effectiveIncVat,
+    unitPriceExVat: itemNet,
+    unitPriceIncVat: itemGross,
     totalIncVat: effectiveIncVat,
-    vatTotal: finalVat,
-    netRevenue: effectiveExVat,
+    vatTotal: computedVatTotal,
+    netRevenue: itemNet,
+    netTotal,
+    itemGross,
     marketCountryCode,
     shippingCharge,
     giftWrap,
@@ -709,6 +728,19 @@ function roundToCents(value) {
   return Math.round((num + Number.EPSILON) * 100) / 100;
 }
 
+function calcNetFromGross(gross, ratePercent) {
+  const grossNum = Number(gross);
+  const rate = Number(ratePercent);
+  if (!Number.isFinite(grossNum) || !Number.isFinite(rate)) return null;
+  return roundToCents(grossNum / (1 + rate / 100));
+}
+
+function calcVatFromGross(gross, ratePercent) {
+  const net = calcNetFromGross(gross, ratePercent);
+  if (net == null) return null;
+  return roundToCents(Number(gross) - net);
+}
+
 function isRateConsistentWithRoundedAmounts(ratePercent, amounts) {
   const rate = Number(ratePercent);
   if (!Number.isFinite(rate) || rate < 0) return false;
@@ -793,14 +825,16 @@ function renderInvoice(parsed, seller, buyerOverride) {
 
   const quantity = Number(parsed.quantity) > 0 ? Number(parsed.quantity) : 1;
   const unitPriceExVat = parsed.netRevenue != null ? parsed.netRevenue / quantity : null;
-  const unitPriceIncVat = parsed.totalIncVat != null ? parsed.totalIncVat / quantity : null;
+  const itemGross = parsed.itemGross != null ? parsed.itemGross : parsed.totalIncVat;
+  const unitPriceIncVat = itemGross != null ? itemGross / quantity : null;
+  const netTotalForVat = parsed.netTotal ?? parsed.netRevenue;
   const vatRate =
-    parsed.vatTotal != null && parsed.netRevenue
-      ? (parsed.vatTotal / parsed.netRevenue) * 100
+    parsed.vatTotal != null && netTotalForVat
+      ? (parsed.vatTotal / netTotalForVat) * 100
       : null;
   const vatRateText = formatVatRateDisplay(vatRate, parsed.marketCountryCode, {
     totalIncVat: parsed.totalIncVat,
-    netRevenue: parsed.netRevenue,
+    netRevenue: netTotalForVat,
     vatTotal: parsed.vatTotal,
   });
 
@@ -876,14 +910,14 @@ function renderInvoice(parsed, seller, buyerOverride) {
           <td class="num-cell">${escapeHtml(formatMoney(unitPriceExVat, currency) || "-")}</td>
           <td class="num-cell">${escapeHtml(vatRateText)}</td>
           <td class="num-cell">${escapeHtml(formatMoney(unitPriceIncVat, currency) || "-")}</td>
-          <td class="num-cell">${escapeHtml(formatMoney(parsed.totalIncVat, currency) || "-")}</td>
+          <td class="num-cell">${escapeHtml(formatMoney(itemGross, currency) || "-")}</td>
         </tr>
       `
     : `
         <tr>
           <td class="desc-cell">${productDetails}</td>
           <td class="num-cell">${escapeHtml(quantity)}</td>
-          <td class="num-cell">${escapeHtml(formatMoney(parsed.totalIncVat, currency) || "-")}</td>
+          <td class="num-cell">${escapeHtml(formatMoney(itemGross, currency) || "-")}</td>
         </tr>
       `;
 
@@ -925,14 +959,14 @@ function renderInvoice(parsed, seller, buyerOverride) {
           <tbody>
             <tr>
               <td>${escapeHtml(vatRateText)}</td>
-              <td class="num-cell">${escapeHtml(formatMoney(parsed.netRevenue, currency) || "-")}</td>
+              <td class="num-cell">${escapeHtml(formatMoney(netTotalForVat, currency) || "-")}</td>
               <td class="num-cell">${escapeHtml(formatMoney(parsed.vatTotal, currency) || "-")}</td>
             </tr>
           </tbody>
           <tfoot>
             <tr>
               <td>VAT Total</td>
-              <td class="num-cell">${escapeHtml(formatMoney(parsed.netRevenue, currency) || "-")}</td>
+              <td class="num-cell">${escapeHtml(formatMoney(netTotalForVat, currency) || "-")}</td>
               <td class="num-cell">${escapeHtml(formatMoney(parsed.vatTotal, currency) || "-")}</td>
             </tr>
           </tfoot>
