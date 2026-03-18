@@ -178,7 +178,7 @@
       <section class="card">
         <h1 class="title">标题格式化工具</h1>
         <p class="subtitle">
-          用于把商品标题统一为可读格式。支持排除词、强制大写词，保留原始换行与标点结构。
+          用于把商品标题统一为可读格式。支持排除词、品牌写法、常见缩写，保留原始换行与标点结构。
         </p>
 
         <div class="main-grid">
@@ -201,6 +201,7 @@
           <button class="btn btn-ghost" id="copyBtn" type="button">复制结果</button>
           <button class="btn btn-ghost" id="sampleBtn" type="button">填充示例</button>
           <button class="btn btn-ghost" id="clearBtn" type="button">清空</button>
+          <button class="btn btn-ghost" id="openTranslateBtn" type="button">新标签打开翻译</button>
           <label class="switch">
             <input id="autoRun" type="checkbox" checked />
             实时转换
@@ -216,6 +217,8 @@
 
     <script>
       "use strict";
+
+      const GOOGLE_TRANSLATE_BASE = "https://translate.google.com/?hl=zh-CN&sl=auto&tl=zh-CN&op=translate";
 
       const SMALL_WORDS = new Set([
         "a",
@@ -272,7 +275,85 @@
         "è",
       ]);
 
-      const FORCE_UPPER_WORDS = new Set(["diy"]);
+      const FORCE_UPPER_WORDS = new Set([
+        "ai",
+        "cpu",
+        "diy",
+        "fhd",
+        "gb",
+        "gps",
+        "gpu",
+        "hd",
+        "hdmi",
+        "hdr",
+        "ips",
+        "kb",
+        "lcd",
+        "led",
+        "mb",
+        "mp",
+        "nfc",
+        "oled",
+        "pc",
+        "pcie",
+        "qhd",
+        "qled",
+        "ram",
+        "rgb",
+        "rom",
+        "sd",
+        "ssd",
+        "tb",
+        "tf",
+        "uhd",
+        "usb",
+        "xdr",
+      ]);
+
+      const EXACT_CASE_WORDS = new Map([
+        ["airplay", "AirPlay"],
+        ["airpods", "AirPods"],
+        ["airtag", "AirTag"],
+        ["apple", "Apple"],
+        ["earpods", "EarPods"],
+        ["esim", "eSIM"],
+        ["facetime", "FaceTime"],
+        ["homepod", "HomePod"],
+        ["imac", "iMac"],
+        ["ios", "iOS"],
+        ["ipad", "iPad"],
+        ["ipados", "iPadOS"],
+        ["iphone", "iPhone"],
+        ["ipod", "iPod"],
+        ["macbook", "MacBook"],
+        ["macos", "macOS"],
+        ["magsafe", "MagSafe"],
+        ["mah", "mAh"],
+        ["qi", "Qi"],
+        ["qi2", "Qi2"],
+        ["wifi", "Wi-Fi"],
+        ["watchos", "watchOS"],
+        ["xbox", "Xbox"],
+      ]);
+      const TOKEN_REGEX = /[A-Za-zÀ-ÖØ-öø-ÿ0-9]+/g;
+      const TOKEN_BOUNDARY_CLASS = "A-Za-zÀ-ÖØ-öø-ÿ0-9";
+      const queryParams = new URLSearchParams(window.location.search);
+      const brandParam = String(queryParams.get("Brand") || "").trim();
+      const otherParamValues = Array.from(
+        new Set(
+          String(queryParams.get("other") || "")
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean),
+        ),
+      );
+      const protectedTerms = [
+        ...(brandParam ? [{ match: brandParam, replacement: brandParam }] : []),
+        ...otherParamValues.map((item) => ({
+          match: item,
+          replacement: item.toUpperCase(),
+        })),
+      ];
 
       const inputTextEl = document.getElementById("inputText");
       const outputTextEl = document.getElementById("outputText");
@@ -283,6 +364,7 @@
       const copyBtnEl = document.getElementById("copyBtn");
       const sampleBtnEl = document.getElementById("sampleBtn");
       const clearBtnEl = document.getElementById("clearBtn");
+      const openTranslateBtnEl = document.getElementById("openTranslateBtn");
 
       function setStatus(message, type) {
         statusTextEl.textContent = message;
@@ -300,24 +382,91 @@
           .replace(/）/g, ")");
       }
 
-      function transformWord(rawWord) {
+      function escapeRegex(value) {
+        return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      }
+
+      function protectConfiguredTerms(text) {
+        if (!protectedTerms.length) {
+          return {
+            text,
+            replacements: new Map(),
+          };
+        }
+
+        let protectedText = text;
+        const replacements = new Map();
+
+        protectedTerms.forEach((term, index) => {
+          const token = String.fromCodePoint(0xe000 + index);
+          const pattern = new RegExp(
+            `(^|[^${TOKEN_BOUNDARY_CLASS}])(${escapeRegex(term.match)})(?=$|[^${TOKEN_BOUNDARY_CLASS}])`,
+            "gi",
+          );
+
+          protectedText = protectedText.replace(pattern, (_match, prefix) => `${prefix}${token}`);
+          replacements.set(token, term.replacement);
+        });
+
+        return {
+          text: protectedText,
+          replacements,
+        };
+      }
+
+      function restoreConfiguredTerms(text, replacements) {
+        let restoredText = text;
+
+        replacements.forEach((replacement, token) => {
+          restoredText = restoredText.split(token).join(replacement);
+        });
+
+        return restoredText;
+      }
+
+      function isStrongBoundary(text, index) {
+        for (let i = index - 1; i >= 0; i -= 1) {
+          const char = text[i];
+          if (/\s/.test(char)) continue;
+          return /[\n.!?:;([/]/.test(char);
+        }
+        return true;
+      }
+
+      function transformWord(rawWord, index, sourceText) {
         const lowerWord = rawWord.toLowerCase();
+        const shouldCapitalizeSmallWord = isStrongBoundary(sourceText, index);
+
+        if (EXACT_CASE_WORDS.has(lowerWord)) {
+          return EXACT_CASE_WORDS.get(lowerWord);
+        }
 
         if (FORCE_UPPER_WORDS.has(lowerWord)) {
           return lowerWord.toUpperCase();
         }
 
-        if (SMALL_WORDS.has(lowerWord) || /^\d+$/.test(lowerWord)) {
+        if (/^[a-z]\d+[a-z0-9]*$/.test(lowerWord)) {
+          return lowerWord[0].toUpperCase() + lowerWord.slice(1);
+        }
+
+        if (SMALL_WORDS.has(lowerWord) && !shouldCapitalizeSmallWord) {
           return lowerWord;
         }
 
-        if (!lowerWord.length) return lowerWord;
+        if (/^\d+$/.test(lowerWord) || !lowerWord.length) {
+          return lowerWord;
+        }
+
         return lowerWord[0].toUpperCase() + lowerWord.slice(1);
       }
 
       function transformText(text) {
-        const normalized = normalizeInput(text).toLowerCase();
-        return normalized.replace(/[A-Za-zÀ-ÖØ-öø-ÿ0-9]+/g, transformWord);
+        const normalized = normalizeInput(text);
+        const { text: protectedText, replacements } = protectConfiguredTerms(normalized);
+        const transformed = protectedText.toLowerCase().replace(TOKEN_REGEX, (rawWord, index, sourceText) =>
+          transformWord(rawWord, index, sourceText),
+        );
+        return restoreConfiguredTerms(transformed, replacements);
       }
 
       function refreshMeta() {
@@ -329,6 +478,24 @@
         outputTextEl.value = transformText(inputTextEl.value);
         refreshMeta();
         setStatus("转换完成", "ok");
+      }
+
+      function buildTranslateUrl(text) {
+        const translateUrl = new URL(GOOGLE_TRANSLATE_BASE);
+        if (text && text.trim()) {
+          translateUrl.searchParams.set("text", text);
+        }
+        return translateUrl.toString();
+      }
+
+      function getTextForTranslate() {
+        return outputTextEl.value || transformText(inputTextEl.value);
+      }
+
+      function openTranslateInNewTab() {
+        const text = getTextForTranslate();
+        window.open(buildTranslateUrl(text), "_blank", "noopener,noreferrer");
+        setStatus("已在新标签打开翻译", "ok");
       }
 
       async function copyResult() {
@@ -351,7 +518,7 @@
 
       function fillSample() {
         inputTextEl.value =
-          "iphone 16e 128 gb: entwickelt für apple intelligence, a18 chip, gigantische batterielaufzeit, 48 mp fusion kamera, 6,1'' super retina xdr display, schwarz";
+          "iphone 16e 128 gb: entwickelt für apple intelligence, a18 chip, gigantische batterielaufzeit, 48 mp fusion kamera, usb-c, wifi 6, 6,1'' super retina xdr display, schwarz";
         runTransform();
       }
 
@@ -379,7 +546,7 @@
       copyBtnEl.addEventListener("click", copyResult);
       sampleBtnEl.addEventListener("click", fillSample);
       clearBtnEl.addEventListener("click", clearAll);
-
+      openTranslateBtnEl.addEventListener("click", openTranslateInNewTab);
       refreshMeta();
     </script>
   </body>
