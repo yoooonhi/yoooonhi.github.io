@@ -74,12 +74,45 @@
               </label>
             </div>
           </details>
+
+
         </section>
 
         <section class="panel preview-panel">
           <div class="preview-toolbar">
             <h2>4) 发票预览</h2>
-            <button id="pdfBtn" class="btn primary">导出 PDF</button>
+            <div style="margin-left: auto; display: flex; align-items: center; gap: 1rem;">
+              <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: #4b5563; white-space: nowrap;">
+                币种
+                <select id="currencyOverride" style="width: auto;">
+                  <option value="">自动检测</option>
+                  <option value="€">欧元 (€)</option>
+                  <option value="US$">美元 (US$)</option>
+                  <option value="£">英镑 (£)</option>
+                  <option value="¥">日元 (¥)</option>
+                  <option value="CA$">加元 (CA$)</option>
+                  <option value="A$">澳元 (A$)</option>
+                  <option value="PLN">波兰兹罗提 (PLN)</option>
+                  <option value="SEK">瑞典克朗 (SEK)</option>
+                  <option value="MX$">墨西哥比索 (MX$)</option>
+                  <option value="SAR">沙特里亚尔 (SAR)</option>
+                  <option value="TRY">土耳其里拉 (TRY)</option>
+                  <option value="AED">阿联酋迪拉姆 (AED)</option>
+                </select>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: #4b5563; white-space: nowrap;">
+                语言
+                <select id="invoiceLang">
+                  <option value="en">English</option>
+                  <option value="de">Deutsch</option>
+                  <option value="fr">Français</option>
+                  <option value="it">Italiano</option>
+                  <option value="es">Español</option>
+                  <option value="ja">日本語</option>
+                </select>
+              </label>
+              <button id="pdfBtn" class="btn primary">导出 PDF</button>
+            </div>
           </div>
           <p id="statusText" class="status">
             等待订单文本。点击“解析并生成”后会创建发票内容。
