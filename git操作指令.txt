@@ -1,0 +1,14 @@
+# 1. 进入代码目录（替换为你的实际路径）
+cd /Users/yoonhi/Code/亚马逊发票
+
+# 2. （可选）查看本地修改的文件（确认要提交的内容）
+git status
+
+# 3. 添加所有修改到暂存区（. 代表所有文件，也可指定单个文件）
+git add .
+
+# 4. 提交到本地仓库（必须写清晰的修改说明）
+git commit -m "修改：XXX功能 / 修复：XXX问题"
+
+# 5. 推送到 GitHub 远程仓库
+git push origin main
