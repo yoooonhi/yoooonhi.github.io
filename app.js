@@ -18,6 +18,11 @@ const buyerFields = {
   address: document.getElementById("buyerAddressOverride"),
 };
 
+const invoiceSettings = {
+  currency: document.getElementById("currencyOverride"),
+  lang: document.getElementById("invoiceLang"),
+};
+
 const SAMPLE_TEXT = `Apple
 德国
 搜索
@@ -183,6 +188,243 @@ const SUPPORT_DOMAIN_BY_COUNTRY_CODE = {
 
 const COMMON_VAT_RATES = [0, 5, 7, 8, 9, 10, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27];
 
+const TRANSLATIONS = {
+  en: {
+    docTitleInvoice: "Invoice",
+    docTitleReceipt: "Receipt",
+    docNoLabelInvoice: "Invoice number",
+    docNoLabelReceipt: "Receipt number",
+    docDateLabelInvoice: "Delivery date",
+    docDateLabelReceipt: "Receipt date",
+    detailsTitleInvoice: "Invoice details",
+    detailsTitleReceipt: "Receipt details",
+    paymentRef: "Payment reference number",
+    invoiceDate: "Invoice date",
+    total: "Total",
+    description: "Description",
+    qty: "Qty",
+    unitPriceExVat: "Unit price<br/>(excl. VAT)",
+    vatRate: "VAT %",
+    unitPriceIncVat: "Unit price<br/>(incl. VAT)",
+    subtotalIncVat: "Subtotal<br/>(incl. VAT)",
+    subtotal: "Subtotal",
+    shippingCharge: "Shipping charge",
+    giftWrap: "Gift Wrap",
+    promotions: "Promotions",
+    vatBreakdownTitle: "VAT %",
+    vatBreakdownNet: "Subtotal<br/>(excl. VAT)",
+    vatBreakdownVat: "VAT",
+    vatTotal: "VAT Total",
+    supportIntro: "For questions about your order, visit",
+    footerNote: "Deemed supply to Amazon solely for VAT purposes",
+    soldBy: "Sold by",
+    billingAddress: "Billing address",
+    deliveryAddress: "Delivery address",
+    orderInfo: "Order information",
+    orderDate: "Order date",
+    orderNumber: "Order number",
+    totalAmount: "Total amount",
+    page: "Page",
+    of: "of",
+    totalPayable: "Total payable",
+  },
+  de: {
+    docTitleInvoice: "Rechnung",
+    docTitleReceipt: "Beleg",
+    docNoLabelInvoice: "Rechnungsnummer",
+    docNoLabelReceipt: "Belegnummer",
+    docDateLabelInvoice: "Lieferdatum",
+    docDateLabelReceipt: "Belegdatum",
+    detailsTitleInvoice: "Rechnungsdetails",
+    detailsTitleReceipt: "Belegdetails",
+    paymentRef: "Zahlungsreferenznummer",
+    invoiceDate: "Rechnungsdatum",
+    total: "Gesamtbetrag",
+    description: "Beschreibung",
+    qty: "Menge",
+    unitPriceExVat: "Stückpreis<br/>(exkl. MwSt.)",
+    vatRate: "MwSt. %",
+    unitPriceIncVat: "Stückpreis<br/>(inkl. MwSt.)",
+    subtotalIncVat: "Zwischensumme<br/>(inkl. MwSt.)",
+    subtotal: "Zwischensumme",
+    shippingCharge: "Versandkosten",
+    giftWrap: "Geschenkverpackung",
+    promotions: "Werbeaktionen",
+    vatBreakdownTitle: "MwSt. %",
+    vatBreakdownNet: "Zwischensumme<br/>(exkl. MwSt.)",
+    vatBreakdownVat: "MwSt.",
+    vatTotal: "MwSt. Gesamt",
+    supportIntro: "Bei Fragen zu Ihrer Bestellung, besuchen Sie",
+    footerNote: "Lieferung an Amazon nur für MwSt.-Zwecke",
+    soldBy: "Verkauft von",
+    billingAddress: "Rechnungsadresse",
+    deliveryAddress: "Lieferadresse",
+    orderInfo: "Bestellinformationen",
+    orderDate: "Bestelldatum",
+    orderNumber: "Bestellnummer",
+    totalAmount: "Gesamtbetrag",
+    page: "Seite",
+    of: "von",
+    totalPayable: "Zu zahlender Gesamtbetrag",
+  },
+  fr: {
+    docTitleInvoice: "Facture",
+    docTitleReceipt: "Reçu",
+    docNoLabelInvoice: "Numéro de facture",
+    docNoLabelReceipt: "Numéro de reçu",
+    docDateLabelInvoice: "Date de livraison",
+    docDateLabelReceipt: "Date de reçu",
+    detailsTitleInvoice: "Détails de la facture",
+    detailsTitleReceipt: "Détails du reçu",
+    paymentRef: "Référence de paiement",
+    invoiceDate: "Date de la facture",
+    total: "Total",
+    description: "Description",
+    qty: "Qté",
+    unitPriceExVat: "Prix unitaire<br/>(HT)",
+    vatRate: "TVA %",
+    unitPriceIncVat: "Prix unitaire<br/>(TTC)",
+    subtotalIncVat: "Sous-total<br/>(TTC)",
+    subtotal: "Sous-total",
+    shippingCharge: "Frais de port",
+    giftWrap: "Emballage cadeau",
+    promotions: "Promotions",
+    vatBreakdownTitle: "TVA %",
+    vatBreakdownNet: "Sous-total<br/>(HT)",
+    vatBreakdownVat: "TVA",
+    vatTotal: "Total TVA",
+    supportIntro: "Pour toute question sur votre commande, visitez",
+    footerNote: "Fourniture réputée à Amazon uniquement à des fins de TVA",
+    soldBy: "Vendu par",
+    billingAddress: "Adresse de facturation",
+    deliveryAddress: "Adresse de livraison",
+    orderInfo: "Informations sur la commande",
+    orderDate: "Date de la commande",
+    orderNumber: "Numéro de commande",
+    totalAmount: "Montant total",
+    page: "Page",
+    of: "sur",
+    totalPayable: "Total à payer",
+  },
+  it: {
+    docTitleInvoice: "Fattura",
+    docTitleReceipt: "Ricevuta",
+    docNoLabelInvoice: "Numero fattura",
+    docNoLabelReceipt: "Numero ricevuta",
+    docDateLabelInvoice: "Data di consegna",
+    docDateLabelReceipt: "Data ricevuta",
+    detailsTitleInvoice: "Dettagli fattura",
+    detailsTitleReceipt: "Dettagli ricevuta",
+    paymentRef: "Riferimento pagamento",
+    invoiceDate: "Data fattura",
+    total: "Totale",
+    description: "Descrizione",
+    qty: "Qtà",
+    unitPriceExVat: "Prezzo unitario<br/>(IVA esclusa)",
+    vatRate: "IVA %",
+    unitPriceIncVat: "Prezzo unitario<br/>(IVA inclusa)",
+    subtotalIncVat: "Subtotale<br/>(IVA inclusa)",
+    subtotal: "Subtotale",
+    shippingCharge: "Spese di spedizione",
+    giftWrap: "Confezione regalo",
+    promotions: "Promozioni",
+    vatBreakdownTitle: "IVA %",
+    vatBreakdownNet: "Subtotale<br/>(IVA esclusa)",
+    vatBreakdownVat: "IVA",
+    vatTotal: "Totale IVA",
+    supportIntro: "Per domande sul tuo ordine, visita",
+    footerNote: "Cessione presunta ad Amazon solo ai fini IVA",
+    soldBy: "Venduto da",
+    billingAddress: "Indirizzo di fatturazione",
+    deliveryAddress: "Indirizzo di consegna",
+    orderInfo: "Informazioni sull'ordine",
+    orderDate: "Data dell'ordine",
+    orderNumber: "Numero dell'ordine",
+    totalAmount: "Importo totale",
+    page: "Pagina",
+    of: "di",
+    totalPayable: "Totale da pagare",
+  },
+  es: {
+    docTitleInvoice: "Factura",
+    docTitleReceipt: "Recibo",
+    docNoLabelInvoice: "Número de factura",
+    docNoLabelReceipt: "Número de recibo",
+    docDateLabelInvoice: "Fecha de entrega",
+    docDateLabelReceipt: "Fecha de recibo",
+    detailsTitleInvoice: "Detalles de la factura",
+    detailsTitleReceipt: "Detalles del recibo",
+    paymentRef: "Referencia de pago",
+    invoiceDate: "Fecha de la factura",
+    total: "Total",
+    description: "Descripción",
+    qty: "Cant.",
+    unitPriceExVat: "Precio unitario<br/>(sin IVA)",
+    vatRate: "IVA %",
+    unitPriceIncVat: "Precio unitario<br/>(con IVA)",
+    subtotalIncVat: "Subtotal<br/>(con IVA)",
+    subtotal: "Subtotal",
+    shippingCharge: "Gastos de envío",
+    giftWrap: "Envoltorio para regalo",
+    promotions: "Promociones",
+    vatBreakdownTitle: "IVA %",
+    vatBreakdownNet: "Subtotal<br/>(sin IVA)",
+    vatBreakdownVat: "IVA",
+    vatTotal: "Total IVA",
+    supportIntro: "Para preguntas sobre tu pedido, visita",
+    footerNote: "Suministro considerado a Amazon únicamente a efectos de IVA",
+    soldBy: "Vendido por",
+    billingAddress: "Dirección de facturación",
+    deliveryAddress: "Dirección de entrega",
+    orderInfo: "Información del pedido",
+    orderDate: "Fecha del pedido",
+    orderNumber: "Número de pedido",
+    totalAmount: "Importe total",
+    page: "Página",
+    of: "de",
+    totalPayable: "Total a pagar",
+  },
+  ja: {
+    docTitleInvoice: "請求書",
+    docTitleReceipt: "領収書",
+    docNoLabelInvoice: "請求書番号",
+    docNoLabelReceipt: "領収書番号",
+    docDateLabelInvoice: "配達日",
+    docDateLabelReceipt: "領収日",
+    detailsTitleInvoice: "請求書の詳細",
+    detailsTitleReceipt: "領収書の詳細",
+    paymentRef: "支払参照番号",
+    invoiceDate: "請求日",
+    total: "合計",
+    description: "説明",
+    qty: "数量",
+    unitPriceExVat: "単価<br/>(税抜)",
+    vatRate: "消費税率",
+    unitPriceIncVat: "単価<br/>(税込)",
+    subtotalIncVat: "小計<br/>(税込)",
+    subtotal: "小計",
+    shippingCharge: "配送料",
+    giftWrap: "ギフト包装",
+    promotions: "プロモーション",
+    vatBreakdownTitle: "消費税率",
+    vatBreakdownNet: "小計<br/>(税抜)",
+    vatBreakdownVat: "消費税",
+    vatTotal: "消費税合計",
+    supportIntro: "ご注文に関するお問い合わせは、こちらをご覧ください",
+    footerNote: "VAT目的でのみAmazonへのみなし供給",
+    soldBy: "販売元",
+    billingAddress: "請求先住所",
+    deliveryAddress: "配送先住所",
+    orderInfo: "注文情報",
+    orderDate: "注文日",
+    orderNumber: "注文番号",
+    totalAmount: "合計金額",
+    page: "ページ",
+    of: "の",
+    totalPayable: "支払総額",
+  },
+};
+
 function escapeHtml(value) {
   return String(value || "")
     .replace(/&/g, "&amp;")
@@ -330,6 +572,7 @@ function currencyTokenFromCountryCode(countryCode) {
 }
 
 function detectCurrency(text, marketCountryCode = "") {
+  if (/€/.test(text) || /\bEUR\b/i.test(text)) return "€";
   if (/(?:CA\$|C\$|\bCAD\b)/i.test(text)) return "CA$";
   if (/(?:US\$|\bUSD\b)/i.test(text)) return "US$";
   if (/(?:A\$|\bAUD\b)/i.test(text)) return "A$";
@@ -341,7 +584,6 @@ function detectCurrency(text, marketCountryCode = "") {
   if (/\bTRY\b|₺/i.test(text)) return "TRY";
   if (/\bJPY\b|[¥￥]/.test(text)) return "¥";
   if (/\bGBP\b|£/.test(text)) return "£";
-  if (/€/.test(text) || /\bEUR\b/i.test(text)) return "€";
 
   const symbol = matchOne(text, /([$£¥￥₺])/);
   if (symbol === "$") {
@@ -403,7 +645,7 @@ function formatMoney(value, symbol = "€") {
   }
 
   if (symbol === "¥") {
-    return formatCurrencyWithIntl(num, "ja-JP", "JPY", "", 0, 0);
+    return formatCurrencyWithIntl(num, "ja-JP", "JPY");
   }
 
   if (symbol === "PLN") {
@@ -820,7 +1062,8 @@ function resolveSupportDomain(channel, marketCountryCode = "") {
   return domainMatch ? domainMatch[0] : "";
 }
 
-function renderInvoice(parsed, seller, buyerOverride) {
+function renderInvoice(parsed, seller, buyerOverride, lang = "en") {
+  const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
   const currency = parsed.currency || "€";
 
   const quantity = Number(parsed.quantity) > 0 ? Number(parsed.quantity) : 1;
@@ -842,9 +1085,9 @@ function renderInvoice(parsed, seller, buyerOverride) {
   const giftWrap = parsed.giftWrap ?? null;
   const promotions = parsed.promotions ?? null;
   const extraRows = [];
-  if (shippingCharge != null) extraRows.push({ label: "Shipping charge", amount: shippingCharge });
-  if (giftWrap != null) extraRows.push({ label: "Gift wrap", amount: giftWrap });
-  if (promotions != null) extraRows.push({ label: "Promotions", amount: promotions });
+  if (shippingCharge != null) extraRows.push({ label: t.shippingCharge, amount: shippingCharge });
+  if (giftWrap != null) extraRows.push({ label: t.giftWrap, amount: giftWrap });
+  if (promotions != null) extraRows.push({ label: t.promotions, amount: promotions });
   const hasExtraRows = extraRows.length > 0;
 
   const invoiceDate = toTemplateDate(parsed.purchaseDate);
@@ -861,7 +1104,7 @@ function renderInvoice(parsed, seller, buyerOverride) {
   const supportLineHtml = supportDomain
     ? `
         <div class="support-line">
-          For questions about your order, visit
+          ${t.supportIntro}
           <a
             class="support-link"
             href="https://www.${escapeHtml(supportDomain)}/contact-us"
@@ -872,28 +1115,28 @@ function renderInvoice(parsed, seller, buyerOverride) {
       `
     : "";
   const isTaxInvoice = parsed.vatTotal != null && Math.abs(parsed.vatTotal) > 0.00001;
-  const docTitle = isTaxInvoice ? "Invoice" : "Receipt";
-  const docNoLabel = isTaxInvoice ? "Invoice number" : "Receipt number";
-  const docDateLabel = isTaxInvoice ? "Delivery date" : "Receipt date";
-  const detailsTitle = isTaxInvoice ? "Invoice details" : "Receipt details";
+  const docTitle = isTaxInvoice ? t.docTitleInvoice : t.docTitleReceipt;
+  const docNoLabel = isTaxInvoice ? t.docNoLabelInvoice : t.docNoLabelReceipt;
+  const docDateLabel = isTaxInvoice ? t.docDateLabelInvoice : t.docDateLabelReceipt;
+  const detailsTitle = isTaxInvoice ? t.detailsTitleInvoice : t.detailsTitleReceipt;
   const refNo = parsed.orderItemId || parsed.orderId || "-";
 
   const detailsHead = isTaxInvoice
     ? `
         <tr>
-          <th>Description</th>
-          <th class="num-cell">Qty</th>
-          <th class="num-cell">Unit price<br/>(excl. VAT)</th>
-          <th class="num-cell">VAT %</th>
-          <th class="num-cell">Unit price<br/>(incl. VAT)</th>
-          <th class="num-cell">Subtotal<br/>(incl. VAT)</th>
+          <th>${t.description}</th>
+          <th class="num-cell">${t.qty}</th>
+          <th class="num-cell">${t.unitPriceExVat}</th>
+          <th class="num-cell">${t.vatRate}</th>
+          <th class="num-cell">${t.unitPriceIncVat}</th>
+          <th class="num-cell">${t.subtotalIncVat}</th>
         </tr>
       `
     : `
         <tr>
-          <th>Description</th>
-          <th class="num-cell">Qty</th>
-          <th class="num-cell">Subtotal</th>
+          <th>${t.description}</th>
+          <th class="num-cell">${t.qty}</th>
+          <th class="num-cell">${t.subtotal}</th>
         </tr>
       `;
 
@@ -951,9 +1194,9 @@ function renderInvoice(parsed, seller, buyerOverride) {
         <table>
           <thead>
             <tr>
-              <th>VAT %</th>
-              <th class="num-cell">Subtotal<br/>(excl. VAT)</th>
-              <th class="num-cell">VAT</th>
+              <th>${t.vatBreakdownTitle}</th>
+              <th class="num-cell">${t.vatBreakdownNet}</th>
+              <th class="num-cell">${t.vatBreakdownVat}</th>
             </tr>
           </thead>
           <tbody>
@@ -965,7 +1208,7 @@ function renderInvoice(parsed, seller, buyerOverride) {
           </tbody>
           <tfoot>
             <tr>
-              <td>VAT Total</td>
+              <td>${t.vatTotal}</td>
               <td class="num-cell">${escapeHtml(formatMoney(netTotalForVat, currency) || "-")}</td>
               <td class="num-cell">${escapeHtml(formatMoney(parsed.vatTotal, currency) || "-")}</td>
             </tr>
@@ -975,9 +1218,7 @@ function renderInvoice(parsed, seller, buyerOverride) {
     `
     : "";
 
-  const footerNote = isTaxInvoice
-    ? ""
-    : "Deemed supply to Amazon solely for VAT purposes";
+  const footerNote = isTaxInvoice ? "" : t.footerNote;
 
   invoiceEl.classList.remove("empty-state");
   invoiceEl.classList.add("official-template");
@@ -997,12 +1238,12 @@ function renderInvoice(parsed, seller, buyerOverride) {
           </article>
 
           <article class="summary-card">
-            <div class="summary-row"><span>Payment reference number</span><strong>${escapeHtml(refNo)}</strong></div>
-            <div class="summary-row"><span>Sold by</span><strong>${escapeHtml(sellerName)}</strong></div>
+            <div class="summary-row"><span>${t.paymentRef}</span><strong>${escapeHtml(refNo)}</strong></div>
+            <div class="summary-row"><span>${t.soldBy}</span><strong>${escapeHtml(sellerName)}</strong></div>
             <div class="summary-divider"></div>
             <div class="summary-row"><span>${docDateLabel}</span><strong>${escapeHtml(deliveryDate)}</strong></div>
             <div class="summary-row"><span>${docNoLabel}</span><strong>${escapeHtml(parsed.invoiceNo)}</strong></div>
-            <div class="summary-row total-row"><span>Total payable</span><strong>${escapeHtml(formatMoney(parsed.totalIncVat, currency) || "-")}</strong></div>
+            <div class="summary-row total-row"><span>${t.totalPayable}</span><strong>${escapeHtml(formatMoney(parsed.totalIncVat, currency) || "-")}</strong></div>
           </article>
         </section>
         ${supportLineHtml}
@@ -1011,18 +1252,18 @@ function renderInvoice(parsed, seller, buyerOverride) {
 
         <section class="address-grid">
           <article class="address-card">
-            <h4>Billing address</h4>
+            <h4>${t.billingAddress}</h4>
             <p>${escapeHtml(buyerName)}</p>
             <p>${toAddressLines(buyerAddress)}</p>
             ${buyerVatLine}
           </article>
           <article class="address-card">
-            <h4>Delivery address</h4>
+            <h4>${t.deliveryAddress}</h4>
             <p>${escapeHtml(buyerName)}</p>
             <p>${toAddressLines(buyerAddress)}</p>
           </article>
           <article class="address-card">
-            <h4>Sold by</h4>
+            <h4>${t.soldBy}</h4>
             <p>${escapeHtml(sellerName)}</p>
             <p>${toAddressLines(sellerAddress)}</p>
             ${sellerVatLine}
@@ -1032,10 +1273,10 @@ function renderInvoice(parsed, seller, buyerOverride) {
         <div class="template-separator"></div>
 
         <section class="order-info">
-          <h4>Order information</h4>
+          <h4>${t.orderInfo}</h4>
           <div class="order-info-table">
-            <div><span>Order date</span><strong>${escapeHtml(invoiceDate)}</strong></div>
-            <div><span>Order number</span><strong>${escapeHtml(parsed.orderId || "-")}</strong></div>
+            <div><span>${t.orderDate}</span><strong>${escapeHtml(invoiceDate)}</strong></div>
+            <div><span>${t.orderNumber}</span><strong>${escapeHtml(parsed.orderId || "-")}</strong></div>
           </div>
         </section>
         <div class="template-separator"></div>
@@ -1052,13 +1293,13 @@ function renderInvoice(parsed, seller, buyerOverride) {
         </section>
 
         <div class="grand-total${hasExtraRows ? "" : " no-extra-rows"}">
-          <span>Total amount</span>
+          <span>${t.totalAmount}</span>
           <strong>${escapeHtml(formatMoney(parsed.totalIncVat, currency) || "-")}</strong>
         </div>
         ${vatSummaryBlock}
         <footer class="page-footer">
           <div class="footer-note">${footerNote}</div>
-          <div class="footer-page">Page <strong>1</strong> of <strong>1</strong></div>
+          <div class="footer-page">${t.page} <strong>1</strong> ${t.of} <strong>1</strong></div>
         </footer>
       </section>
     </div>
@@ -1378,6 +1619,20 @@ function setStatus(message, type = "") {
   if (type) statusTextEl.classList.add(type);
 }
 
+let lastParsedResult = null;
+
+function renderCurrentInvoice() {
+  if (!lastParsedResult) return;
+  const seller = readSellerInfo();
+  const buyerOverride = readBuyerOverrides();
+  const lang = invoiceSettings.lang.value;
+
+  const currencyOverrideValue = invoiceSettings.currency.value.trim();
+  lastParsedResult.currency = currencyOverrideValue || lastParsedResult.originalCurrency;
+
+  renderInvoice(lastParsedResult, seller, buyerOverride, lang);
+}
+
 function parseAndRender() {
   const rawText = rawInputEl.value.trim();
   if (!rawText) {
@@ -1388,12 +1643,13 @@ function parseAndRender() {
   const parsed = parseOrderText(rawText);
   if (requiredFieldsMissing(parsed)) {
     setStatus("解析不完整：至少需要识别到订单号、商品名和商品总计。", "error");
+    lastParsedResult = null;
     return;
   }
 
-  const seller = readSellerInfo();
-  const buyerOverride = readBuyerOverrides();
-  renderInvoice(parsed, seller, buyerOverride);
+  parsed.originalCurrency = parsed.currency;
+  lastParsedResult = parsed;
+  renderCurrentInvoice();
   setStatus(`解析成功：订单 ${parsed.orderId}，可以导出 PDF。`, "ok");
 }
 
@@ -1442,11 +1698,16 @@ pdfBtnEl.addEventListener("click", () => {
   printInvoiceWithoutFileUrl();
 });
 
-const autoRefreshFields = [...Object.values(sellerFields), ...Object.values(buyerFields)];
+const autoRefreshFields = [...Object.values(sellerFields), ...Object.values(buyerFields), invoiceSettings.currency, invoiceSettings.lang];
 autoRefreshFields.forEach((field) => {
   field.addEventListener("change", () => {
     if (!invoiceEl.classList.contains("empty-state")) {
-      parseAndRender();
+      renderCurrentInvoice();
+    }
+  });
+  field.addEventListener("input", () => {
+    if (!invoiceEl.classList.contains("empty-state")) {
+      renderCurrentInvoice();
     }
   });
 });
